@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS per un look olografico e input perfettamente integrato
+# CSS per pulire completamente l'interfaccia e darle un look olografico totale
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
@@ -31,27 +31,19 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 59, 48, 0.7);
     }
 
-    /* Stile dei messaggi di chat trasparenti e tecnologici */
+    /* Stile dei messaggi */
     .stChatMessage {
-        background-color: rgba(3, 8, 18, 0.7) !important;
+        background-color: rgba(3, 8, 18, 0.8) !important;
         border: 1px solid rgba(0, 210, 255, 0.3) !important;
         border-radius: 6px;
-        box-shadow: 0 0 20px rgba(0, 210, 255, 0.05);
     }
 
-    /* Input di chat completamente mimetizzato e centrato */
-    .stChatInputContainer {
-        background-color: transparent !important;
-        border: none !important;
-        max-width: 750px;
-        margin: 0 auto;
-    }
-
-    .stChatInputContainer textarea, .stChatInputContainer input {
-        background-color: rgba(2, 5, 12, 0.8) !important;
+    /* Casella di input personalizzata stile Stark */
+    .stTextInput input {
+        background-color: rgba(2, 5, 12, 0.9) !important;
         color: #00d2ff !important;
-        border: 1px solid rgba(0, 210, 255, 0.4) !important;
-        border-radius: 8px !important;
+        border: 1px solid rgba(0, 210, 255, 0.5) !important;
+        border-radius: 6px !important;
         font-family: 'Orbitron', sans-serif !important;
         box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
     }
@@ -96,26 +88,34 @@ else:
             {"role": "system", "content": "Sei J.A.R.V.I.S., l'intelligenza artificiale avanzata creata da Tony Stark. Sei estremamente educato, ironico, efficiente, protettivo e parli con un tono formale ma brillante."}
         ]
 
+    # Mostra i messaggi precedenti
     for message in st.session_state.messages:
         if message["role"] != "system":
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    if prompt := st.chat_input("Impartisci un ordine a J.A.R.V.I.S..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    # Spostiamo l'input in un form centrale pulito usando st.text_input al posto del componente fisso in basso
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    with st.form(key="chat_form", clear_on_submit=True):
+        col_input, col_btn = st.columns([5, 1])
+        with col_input:
+            prompt = st.text_input("Impartisci un ordine a J.A.R.V.I.S...", label_visibility="collapsed", placeholder="Impartisci un ordine a J.A.R.V.I.S...")
+        with col_btn:
+            submit_button = st.form_submit_button(label="INVIA")
 
-        with st.chat_message("assistant"):
-            with st.spinner("Analisi dati in corso..."):
-                try:
-                    chat_completion = client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=st.session_state.messages,
-                        temperature=0.7,
-                    )
-                    response = chat_completion.choices[0].message.content
-                    st.markdown(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                except Exception as e:
-                    st.error(f"Errore critico nei sistemi di bordo: {e}")
+    if submit_button and prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        with st.spinner("Analisi dati in corso..."):
+            try:
+                chat_completion = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=st.session_state.messages,
+                    temperature=0.7,
+                )
+                response = chat_completion.choices[0].message.content
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.rerun()
+            except Exception as e:
+                st.error(f"Errore critico nei sistemi di bordo: {e}")
