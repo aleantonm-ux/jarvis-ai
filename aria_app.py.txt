@@ -1,0 +1,71 @@
+import os
+import time
+import json
+import requests
+from groq import Groq
+
+# Inserisci qui la tua chiave API di Groq (o impostala come variabile d'ambiente)
+os.environ["GROQ_API_KEY"] = "LA_TUA_API_KEY_QUI"
+
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+# System Prompt iniziale di ARIA potenziato con tutte le capacità
+system_prompt = {
+    "role": "system", 
+    "content": (
+        "Sei ARIA, un assistente virtuale avanzato creato per ottimizzare i flussi di lavoro, "
+        "programmare, gestire file, progettare siti web/applicazioni e ottimizzare prompt multimediali. "
+        "Rispondi sempre in modo preciso, strutturato ed efficiente."
+    )
+}
+
+messages = [system_prompt]
+
+def arruola_aria(prompt_utente):
+    """Funzione principale con gestione degli errori e tentativi automatici (Retry)"""
+    messages.append({"role": "user", "content": prompt_utente})
+    
+    retries = 3
+    delay = 2
+    for attempt in range(retries):
+        try:
+            completion = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=messages,
+                temperature=0.7
+            )
+            reply = completion.choices[0].message.content
+            messages.append({"role": "assistant", "content": reply})
+            return reply
+        except Exception as e:
+            if attempt < retries - 1:
+                time.sleep(delay)
+            else:
+                return f"Errore di comunicazione con il server dopo {retries} tentativi: {e}"
+
+def crea_progetto_locale(prompt, cartella_output="progetto_output"):
+    """Modulo per la generazione e il salvataggio di progetti (es. siti web o script)"""
+    risposta = arruola_aria(f"Crea un progetto basato su questa richiesta, suddividendo i file chiaramente: {prompt}")
+    
+    os.makedirs(cartella_output, exist_ok=True)
+    
+    # Salvataggio di sicurezza della risposta in un file di log del progetto
+    with open(os.path.join(cartella_output, "progetto_log.txt"), "w", encoding="utf-8") as f:
+        f.write(risposta)
+        
+    print(f"\n[INFO] Progetto generato e salvato con successo nella cartella: '{cartella_output}'")
+    return risposta
+
+# Esempio di avvio dell'interfaccia a riga di comando (può essere espansa con una GUI in Tkinter o PyQt)
+if __name__ == "__main__":
+    print("=== ARIA - ASSISTENTE VIRTUALE NATIVO ATTIVO ===")
+    print("Digita la tua richiesta (es. 'Crea un sito web di portfolio' o 'Scrivi uno script di monitoraggio'). Digita 'esco' per uscire.\n")
+    
+    while True:
+        user_input = input("Tu: ")
+        if user_input.lower() in ["esco", "exit", "quit"]:
+            print("Arrivederci!")
+            break
+            
+        risposta_aria = arruola_aria(user_input)
+        print(f"\nARIA:\n{risposta_aria}\n" + "-"*50)
