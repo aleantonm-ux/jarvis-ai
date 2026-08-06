@@ -2,46 +2,37 @@ import os
 import streamlit as st
 from groq import Groq
 
-# Configurazione della pagina
+# Configurazione pagina
 st.set_page_config(
     page_title="E.V. // Interfaccia Neurale",
     page_icon="🕸️",
     layout="centered"
 )
 
-# Iniezione di CSS personalizzato per trasformare Streamlit in un HUD futuristico
+# Grafica avanzata in stile HUD / Terminale tecnologico
 st.markdown("""
     <style>
-    /* Sfondo generale scuro profondo */
     .stApp {
         background: linear-gradient(135deg, #030712 0%, #0f172a 100%);
         color: #f8fafc;
         font-family: 'Courier New', Courier, monospace;
     }
-    
-    /* Intestazioni in stile terminale */
     h1, h2, h3 {
         color: #38bdf8 !important;
         font-family: 'Courier New', Courier, monospace;
         letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
     }
-
-    /* Stile della chat in basso */
     .stChatInputContainer input {
         background-color: #0b0f19 !important;
         color: #f8fafc !important;
         border: 1px solid #38bdf8 !important;
         border-radius: 4px;
     }
-
-    /* Box laterale */
     section[data-testid="stSidebar"] {
         background-color: #050811;
         border-right: 1px solid #1e293b;
     }
-
-    /* Messaggi della chat */
     .stChatMessage {
         background-color: #0f172a;
         border: 1px solid #1e293b;
@@ -50,7 +41,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Titolo scenografico
+# Intestazione visiva
 st.title("🕸️ E.V. // PROTOCOLLO NEURALE")
 st.caption("Sistema di supporto tattico e analisi dati - Connessione attiva.")
 
@@ -65,7 +56,7 @@ with st.sidebar:
     st.markdown("- **Crittografia:** Attiva")
     st.markdown("- **Modello:** Llama 3.3")
 
-# Controllo chiave API
+# Controllo chiave API e logica chat
 if not api_key_input:
     st.warning("⚠️ **ATTENZIONE:** Inserisci la tua chiave API di Groq nella barra laterale per stabilire il collegamento con E.V.")
 else:
