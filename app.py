@@ -9,7 +9,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Grafica avanzata in stile HUD / Terminale tecnologico
+# Grafica personalizzata HUD / Terminale
 st.markdown("""
     <style>
     .stApp {
