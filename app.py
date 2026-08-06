@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS per pulire completamente l'interfaccia e darle un look olografico totale
+# CSS avanzato con correzione esplicita per la leggibilità del testo digitato e dei messaggi
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
@@ -31,21 +31,31 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 59, 48, 0.7);
     }
 
-    /* Stile dei messaggi */
+    /* Stile dei messaggi della chat e colore del testo all'interno */
     .stChatMessage {
-        background-color: rgba(3, 8, 18, 0.8) !important;
-        border: 1px solid rgba(0, 210, 255, 0.3) !important;
+        background-color: rgba(3, 8, 18, 0.9) !important;
+        border: 1px solid rgba(0, 210, 255, 0.4) !important;
         border-radius: 6px;
     }
-
-    /* Casella di input personalizzata stile Stark */
-    .stTextInput input {
-        background-color: rgba(2, 5, 12, 0.9) !important;
+    
+    .stChatMessage p, .stChatMessage div {
         color: #00d2ff !important;
-        border: 1px solid rgba(0, 210, 255, 0.5) !important;
+        font-family: 'Orbitron', sans-serif !important;
+    }
+
+    /* Casella di input centrale e testo digitato ben visibile */
+    .stTextInput input {
+        background-color: rgba(2, 5, 12, 0.95) !important;
+        color: #00ffff !important;
+        border: 1px solid rgba(0, 210, 255, 0.6) !important;
         border-radius: 6px !important;
         font-family: 'Orbitron', sans-serif !important;
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+    }
+
+    /* Colore del testo mentre si scrive */
+    input[type="text"] {
+        color: #00ffff !important;
     }
 
     section[data-testid="stSidebar"] {
@@ -94,9 +104,9 @@ else:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    # Spostiamo l'input in un form centrale pulito usando st.text_input al posto del componente fisso in basso
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # Form centrale per l'invio dei comandi
     with st.form(key="chat_form", clear_on_submit=True):
         col_input, col_btn = st.columns([5, 1])
         with col_input:
