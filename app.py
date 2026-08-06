@@ -2,7 +2,6 @@ import os
 import streamlit as st
 from groq import Groq
 
-# Configurazione pagina a tutto schermo
 st.set_page_config(
     page_title="J.A.R.V.I.S. // Stark Industries",
     page_icon="⚡",
@@ -10,61 +9,53 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS avanzato per trasformare completamente l'app in un HUD di Iron Man
+# CSS per un look olografico e input perfettamente integrato
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-    /* Nascondi intestazioni e menu standard di Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
     .stApp {
-        background: radial-gradient(circle at center, #070b14 0%, #010307 100%);
+        background: radial-gradient(circle at center, #050b18 0%, #010306 100%);
         color: #00d2ff;
         font-family: 'Orbitron', sans-serif;
-        overflow: hidden;
-    }
-
-    /* Effetto griglia olografica di sfondo */
-    .stApp::before {
-        content: " ";
-        display: block;
-        position: absolute;
-        top: 0; left: 0; bottom: 0; right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 255, 0.03));
-        z-index: 999;
-        background-size: 100% 4px, 6px 100%;
-        pointer-events: none;
     }
 
     h1, h2, h3 {
         font-family: 'Orbitron', sans-serif !important;
         color: #ff3b30 !important;
         letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(255, 59, 48, 0.6);
+        text-shadow: 0 0 12px rgba(255, 59, 48, 0.7);
     }
 
-    /* Stile della chat box */
+    /* Stile dei messaggi di chat trasparenti e tecnologici */
     .stChatMessage {
-        background-color: rgba(5, 10, 20, 0.85) !important;
+        background-color: rgba(3, 8, 18, 0.7) !important;
+        border: 1px solid rgba(0, 210, 255, 0.3) !important;
+        border-radius: 6px;
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.05);
+    }
+
+    /* Input di chat completamente mimetizzato e centrato */
+    .stChatInputContainer {
+        background-color: transparent !important;
+        border: none !important;
+        max-width: 750px;
+        margin: 0 auto;
+    }
+
+    .stChatInputContainer textarea, .stChatInputContainer input {
+        background-color: rgba(2, 5, 12, 0.8) !important;
+        color: #00d2ff !important;
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
-        border-radius: 4px;
+        border-radius: 8px !important;
+        font-family: 'Orbitron', sans-serif !important;
         box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
     }
 
-    /* Input di chat */
-    .stChatInputContainer input {
-        background-color: #03060c !important;
-        color: #00d2ff !important;
-        border: 1px solid #ff3b30 !important;
-        border-radius: 4px;
-        font-family: 'Orbitron', sans-serif !important;
-    }
-
-    /* Sidebar personalizzata */
     section[data-testid="stSidebar"] {
         background-color: #020408;
         border-right: 1px solid rgba(255, 59, 48, 0.4);
@@ -72,18 +63,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Layout principale stile Stark Industries
+# Intestazione superiore in stile HUD
 col1, col2, col3 = st.columns([1, 4, 1])
 
 with col1:
     st.markdown("### 📊 TELEMETRIA")
     st.markdown("- **Reattore:** 99.8%")
     st.markdown("- **Core Temp:** 38.2°C")
-    st.markdown("- **Corazza:** Mark LXXXV")
 
 with col2:
     st.markdown("<h1 style='text-align: center;'>⚡ J.A.R.V.I.S. // STARK HUD</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #00d2ff; font-size: 0.8rem;'>SISTEMA OPERATIVO DI SUPPORTO TATTICO</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #00d2ff; font-size: 0.75rem;'>SISTEMA OPERATIVO DI SUPPORTO TATTICO</p>", unsafe_allow_html=True)
 
 with col3:
     st.markdown("### ⚙️ PROTOCOLLI")
@@ -92,16 +82,12 @@ with col3:
 
 st.markdown("---")
 
-# Barra laterale nascosta per la chiave API
 with st.sidebar:
     st.header("🔑 ACCESSO SICURO")
     api_key_input = st.text_input("Groq API Key:", type="password")
-    st.markdown("---")
-    st.markdown("💡 *'A volte bisogna correre prima di imparare a camminare.'*")
 
-# Logica della chat protetta dalla chiave API
 if not api_key_input:
-    st.warning("⚠️ **ATTENZIONE:** Inserisci la tua chiave API di Groq nella barra laterale (clicca sulla freccetta `>` in alto a sinistra) per avviare i protocolli di J.A.R.V.I.S.")
+    st.warning("⚠️ **ATTENZIONE:** Inserisci la tua chiave API di Groq nella barra laterale (clicca sulla freccetta `>` in alto a sinistra) per avviare J.A.R.V.I.S.")
 else:
     client = Groq(api_key=api_key_input)
 
