@@ -1,71 +1,105 @@
 import os
-import time
-import json
-import requests
+import threading
+import customtkinter as ctk
 from groq import Groq
 
-# Inserisci qui la tua chiave API di Groq (o impostala come variabile d'ambiente)
-os.environ["GROQ_API_KEY"] = "LA_TUA_API_KEY_QUI"
+# Configurazione iniziale del tema grafico
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+class AriaApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-# System Prompt iniziale di ARIA potenziato con tutte le capacità
-system_prompt = {
-    "role": "system", 
-    "content": (
-        "Sei ARIA, un assistente virtuale avanzato creato per ottimizzare i flussi di lavoro, "
-        "programmare, gestire file, progettare siti web/applicazioni e ottimizzare prompt multimediali. "
-        "Rispondi sempre in modo preciso, strutturato ed efficiente."
-    )
-}
+        # Configurazione Finestra Principale
+        self.title("ARIA - Advanced Resilient Intelligent Assistant")
+        self.geometry("1100x700")
 
-messages = [system_prompt]
-
-def arruola_aria(prompt_utente):
-    """Funzione principale con gestione degli errori e tentativi automatici (Retry)"""
-    messages.append({"role": "user", "content": prompt_utente})
-    
-    retries = 3
-    delay = 2
-    for attempt in range(retries):
-        try:
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=messages,
-                temperature=0.7
-            )
-            reply = completion.choices[0].message.content
-            messages.append({"role": "assistant", "content": reply})
-            return reply
-        except Exception as e:
-            if attempt < retries - 1:
-                time.sleep(delay)
-            else:
-                return f"Errore di comunicazione con il server dopo {retries} tentativi: {e}"
-
-def crea_progetto_locale(prompt, cartella_output="progetto_output"):
-    """Modulo per la generazione e il salvataggio di progetti (es. siti web o script)"""
-    risposta = arruola_aria(f"Crea un progetto basato su questa richiesta, suddividendo i file chiaramente: {prompt}")
-    
-    os.makedirs(cartella_output, exist_ok=True)
-    
-    # Salvataggio di sicurezza della risposta in un file di log del progetto
-    with open(os.path.join(cartella_output, "progetto_log.txt"), "w", encoding="utf-8") as f:
-        f.write(risposta)
+        # Inizializzazione Client Groq (legge la chiave in modo sicuro dal PC)
+        self.api_key = os.environ.get("GROQ_API_KEY")
+        if not self.api_key:
+            print("Attenzione: Variabile d'ambiente GROQ_API_KEY non trovata!")
         
-    print(f"\n[INFO] Progetto generato e salvato con successo nella cartella: '{cartella_output}'")
-    return risposta
+        self.client = Groq(api_key=self.api_key)
 
-# Esempio di avvio dell'interfaccia a riga di comando (può essere espansa con una GUI in Tkinter o PyQt)
+        # Memoria Storica della Conversazione
+        self.messages = [
+            {"role": "system", "content": "Sei ARIA, un'interfaccia IA desktop avanzata. Rispondi in modo tecnico ed efficiente."}
+        ]
+
+        # --- LAYOUT DELLA GUI (Griglia) ---
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        # 1. Sidebar (Pannello Laterale)
+        self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar.grid(row=0, column=0, sticky="nsew")
+        
+        self.logo_label = ctk.CTkLabel(self.sidebar, text="ARIA v2.0", font=ctk.CTkFont(size=20, weight="bold"))
+        self.logo_label.pack(pady=20)
+
+        self.btn_progetti = ctk.CTkButton(self.sidebar, text="Progetti", fg_color="transparent", border_width=1)
+        self.btn_progetti.pack(pady=10, padx=20)
+
+        self.btn_monitor = ctk.CTkButton(self.sidebar, text="System Monitor", fg_color="transparent", border_width=1)
+        self.btn_monitor.pack(pady=10, padx=20)
+
+        # 2. Area Chat Centrale
+        self.chat_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.chat_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+        self.chat_frame.grid_rowconfigure(0, weight=1)
+        self.chat_frame.grid_columnconfigure(0, weight=1)
+
+        self.chat_display = ctk.CTkTextbox(self.chat_frame, font=("Arial", 14), wrap="word")
+        self.chat_display.grid(row=0, column=0, sticky="nsew")
+        self.chat_display.configure(state="disabled")
+
+        # 3. Barra di Input (In basso)
+        self.input_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.input_frame.grid(row=1, column=1, padx=20, pady=(0, 20), sticky="ew")
+        self.input_frame.grid_columnconfigure(0, weight=1)
+
+        self.entry = ctk.CTkEntry(self.input_frame, placeholder_text="Chiedi ad ARIA...", font=("Arial", 14))
+        self.entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
+        self.entry.bind("<Return>", lambda e: self.send_message())
+
+        self.send_button = ctk.CTkButton(self.input_frame, text="Invia", width=100, command=self.send_message)
+        self.send_button.grid(row=0, column=1)
+
+    def append_chat(self, sender, text):
+        """Aggiunge i messaggi alla chat grafica in modo sicuro"""
+        self.chat_display.configure(state="normal")
+        self.chat_display.insert("end", f"\n{sender}:\n")
+        self.chat_display.insert("end", f"{text}\n")
+        self.chat_display.configure(state="disabled")
+        self.chat_display.see("end")
+
+    def send_message(self):
+        """Gestisce l'invio del messaggio dell'utente"""
+        user_text = self.entry.get()
+        if not user_text: 
+            return
+        
+        self.entry.delete(0, "end")
+        self.append_chat("TU", user_text)
+        
+        # Esegue la chiamata API in un thread separato per non bloccare la finestra grafica
+        threading.Thread(target=self.get_aria_response, args=(user_text,), daemon=True).start()
+
+    def get_aria_response(self, text):
+        """Comunica con le API di Groq ricevendo la risposta di ARIA"""
+        try:
+            self.messages.append({"role": "user", "content": text})
+            completion = self.client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=self.messages
+            )
+            aria_text = completion.choices[0].message.content
+            self.messages.append({"role": "assistant", "content": aria_text})
+            self.after(0, lambda: self.append_chat("ARIA", aria_text))
+        except Exception as e:
+            self.after(0, lambda: self.append_chat("SISTEMA", f"Errore di comunicazione: {e}"))
+
 if __name__ == "__main__":
-    print("=== ARIA - ASSISTENTE VIRTUALE NATIVO ATTIVO ===")
-    print("Digita la tua richiesta (es. 'Crea un sito web di portfolio' o 'Scrivi uno script di monitoraggio'). Digita 'esco' per uscire.\n")
-    
-    while True:
-        user_input = input("Tu: ")
-        if user_input.lower() in ["esco", "exit", "quit"]:
-            print("Arrivederci!")
-            break
-            
-        risposta_aria = arruola_aria(user_input)
-        print(f"\nARIA:\n{risposta_aria}\n" + "-"*50)
+    app = AriaApp()
+    app.mainloop()
